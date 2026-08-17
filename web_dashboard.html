@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDT Tracker - Remote Controller</title>
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .card {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 32px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            border: 1px solid #334155;
+            text-align: center;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: #38bdf8;
+        }
+        p.subtitle {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 24px;
+            background: #334155;
+            color: #fbbf24;
+        }
+        .btn-trigger {
+            background: #ef4444;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.4);
+            margin-bottom: 12px;
+        }
+        .btn-trigger:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+        .btn-trigger:active {
+            transform: translateY(0);
+        }
+        .btn-stop {
+            background: transparent;
+            color: #94a3b8;
+            border: 1px solid #475569;
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .btn-stop:hover {
+            background: #334155;
+            color: white;
+        }
+        .log-box {
+            margin-top: 24px;
+            background: #090d16;
+            border-radius: 8px;
+            padding: 12px;
+            height: 120px;
+            overflow-y: auto;
+            text-align: left;
+            font-family: monospace;
+            font-size: 12px;
+            color: #4ade80;
+            border: 1px solid #1e293b;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🚨 PDT Tracker Remote Controller</h1>
+        <p class="subtitle">BUNYIKAN ALARM PERANGKAT TERSEHIP / HILANG</p>
+        
+        <div id="status" class="status-badge">Connecting to MQTT...</div>
+
+        <button class="btn-trigger" onclick="triggerAlarm()">🔊 BUNYIKAN ALARM HP NOW</button>
+        <button class="btn-stop" onclick="stopAlarm()">⏹️ HENTIKAN ALARM</button>
+
+        <div id="log" class="log-box">
+            <div>[System Ready] Remote controller loaded.</div>
+        </div>
+    </div>
+
+    <script>
+        const host = 'wss://broker.emqx.io:8084/mqtt';
+        const topic = 'pdt_tracker/alerts';
+        const logBox = document.getElementById('log');
+        const statusBadge = document.getElementById('status');
+
+        function addLog(msg) {
+            const time = new Date().toLocaleTimeString();
+            logBox.innerHTML = `<div>[${time}] ${msg}</div>` + logBox.innerHTML;
+        }
+
+        addLog('Connecting to MQTT Broker via WebSocket...');
+        const client = mqtt.connect(host);
+
+        client.on('connect', () => {
+            statusBadge.innerText = '● CONNECTED TO BROKER';
+            statusBadge.style.background = 'rgba(16, 185, 129, 0.2)';
+            statusBadge.style.color = '#34d399';
+            addLog('Connected to MQTT Broker (broker.emqx.io)');
+        });
+
+        client.on('error', (err) => {
+            statusBadge.innerText = '● DISCONNECTED';
+            statusBadge.style.background = 'rgba(239, 68, 68, 0.2)';
+            statusBadge.style.color = '#f87171';
+            addLog('Connection error: ' + err);
+        });
+
+        function triggerAlarm() {
+            client.publish(topic, 'EMERGENCY_ALARM');
+            addLog('PUBLISHED: EMERGENCY_ALARM -> Topic: ' + topic);
+        }
+
+        function stopAlarm() {
+            client.publish(topic, 'STOP_ALARM');
+            addLog('PUBLISHED: STOP_ALARM -> Topic: ' + topic);
+        }
+    </script>
+</body>
+</html>
