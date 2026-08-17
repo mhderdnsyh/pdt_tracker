@@ -107,13 +107,14 @@ class _TestingInterfaceState extends State<TestingInterface> {
 
         _mqttService!.messageStream.listen((msg) {
           _addLog('Received MQTT Message: $msg');
-          final upper = msg.toUpperCase();
-          if (upper.contains('STOP') || upper.contains('OFF')) {
+          final upper = msg.trim().toUpperCase();
+          if (upper.contains('STOP') || upper.contains('OFF') || upper.contains('HALT')) {
             _stopAlarm();
           } else if (upper.contains('ALARM') || upper.contains('TRIGGER')) {
             _triggerAlarm();
           }
         });
+
 
       } else {
         _addLog('MQTT Error: $errorMsg');

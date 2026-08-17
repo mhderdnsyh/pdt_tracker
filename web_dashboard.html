@@ -150,9 +150,10 @@
         }
 
         function stopAlarm() {
-            client.publish(topic, 'STOP_ALARM');
-            addLog('PUBLISHED: STOP_ALARM -> Topic: ' + topic);
+            client.publish(topic, 'STOP');
+            addLog('PUBLISHED: STOP -> Topic: ' + topic);
         }
+
     </script>
 </body>
 </html>
