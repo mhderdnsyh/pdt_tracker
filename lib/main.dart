@@ -53,7 +53,20 @@ class _TestingInterfaceState extends State<TestingInterface> {
     super.initState();
     _alarmService = AlarmService();
     _addLog('System initialized.');
+
+    // Auto-connect to MQTT on startup for effortless deployment
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _autoConnectMqtt();
+    });
   }
+
+  Future<void> _autoConnectMqtt() async {
+    if (!_isMqttConnected) {
+      _addLog('Auto-connecting to MQTT broker...');
+      await _toggleMqttConnection();
+    }
+  }
+
 
   void _addLog(String msg) {
     setState(() {
